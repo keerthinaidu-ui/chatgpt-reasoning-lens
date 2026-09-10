@@ -1,0 +1,264 @@
+/* Reasoning Lens exact UI styling matching ChatGPT screenshot 1:1 */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+    --bg-main: #0B0C0E;
+    --bg-sidebar: #07080A;
+    --bg-card: #15161A;
+    --bg-card-inner: #111215;
+    --border-color: #23242A;
+    --text-primary: #ECECF1;
+    --text-muted: #7E7F8F;
+    --accent-teal: #00A67E;
+}
+
+html, body, [class*="css"] {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    color: var(--text-primary);
+}
+
+.stApp {
+    background-color: var(--bg-main) !important;
+}
+
+header[data-testid="stHeader"] {
+    background: transparent !important;
+}
+
+/* Sidebar Dark Styling */
+section[data-testid="stSidebar"] {
+    background-color: var(--bg-sidebar) !important;
+    border-right: 1px solid var(--border-color) !important;
+    padding-top: 10px;
+}
+
+.sidebar-header-box {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 10px 4px 16px 4px;
+}
+
+.sidebar-brand-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #FFFFFF !important;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.new-analysis-btn-wrapper {
+    margin-bottom: 20px;
+}
+
+.new-analysis-btn {
+    width: 100%;
+    background-color: #15161A;
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 10px 14px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.88rem;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.cmd-k {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    background: #1F2026;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.sidebar-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin: 16px 0 10px 0;
+}
+
+/* Sidebar buttons styling */
+section[data-testid="stSidebar"] button {
+    text-align: left !important;
+    white-space: pre-line !important;
+    height: auto !important;
+    padding: 10px 12px !important;
+    border-radius: 8px !important;
+    font-size: 0.85rem !important;
+}
+
+section[data-testid="stSidebar"] button[kind="secondary"] {
+    background-color: transparent !important;
+    border: 1px solid transparent !important;
+    color: var(--text-muted) !important;
+}
+
+section[data-testid="stSidebar"] button[kind="primary"] {
+    background-color: #00A67E !important;
+    border: 1px solid #00A67E !important;
+    color: #FFFFFF !important;
+    font-weight: 600 !important;
+}
+
+/* Footer card in sidebar */
+.sidebar-footer-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 14px;
+    margin-top: 50px;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+.sidebar-footer-title {
+    color: var(--accent-teal);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+}
+
+/* Top Toggle Pill */
+.top-toggle-container {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    padding: 4px 14px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+/* Center Hero Header */
+.center-hero {
+    text-align: center;
+    padding: 24px 0 16px 0;
+}
+
+.hero-icon-circle {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: #15161A;
+    border: 1px solid var(--border-color);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 14px;
+}
+
+.hero-main-title {
+    font-size: 2.1rem;
+    font-weight: 700;
+    color: #FFFFFF;
+    margin-bottom: 8px;
+}
+
+/* Composer Container (ChatGPT Card Style) */
+.composer-card-container {
+    background-color: var(--bg-card) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 16px !important;
+    padding: 14px 16px 10px 16px !important;
+    margin-top: 10px !important;
+    margin-bottom: 12px !important;
+    position: relative;
+}
+
+.composer-card-container div[data-testid="stTextArea"] textarea {
+    background-color: transparent !important;
+    border: none !important;
+    color: var(--text-primary) !important;
+    font-size: 0.92rem !important;
+    padding: 4px 0 !important;
+    box-shadow: none !important;
+}
+
+/* ChatGPT Green #00A67E Circle Send Button with White #FFFFFF Horizontal Right Arrow */
+button[key="chatgpt_send_btn"],
+button[key="bottom_send_btn"],
+div[data-testid="stColumn"] button[key="chatgpt_send_btn"],
+div[data-testid="stColumn"] button[key="bottom_send_btn"] {
+    background-color: #00A67E !important;
+    color: #FFFFFF !important;
+    border-radius: 50% !important;
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    max-width: 36px !important;
+    padding: 0 !important;
+    border: none !important;
+    font-size: 1.15rem !important;
+    font-weight: 700 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    box-shadow: 0 2px 6px rgba(0, 166, 126, 0.4) !important;
+    transition: transform 0.15s ease, background-color 0.15s ease !important;
+}
+
+button[key="chatgpt_send_btn"]:hover,
+button[key="bottom_send_btn"]:hover {
+    background-color: #008F6C !important;
+    transform: scale(1.08) !important;
+}
+
+/* Issue Card Explanation */
+.issue-card {
+    background-color: var(--bg-card);
+    border-radius: 12px;
+    padding: 20px;
+    margin-top: 16px;
+    margin-bottom: 24px;
+    border: 1px solid var(--border-color);
+}
+
+.issue-type-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #111827;
+    margin-bottom: 8px;
+}
+
+.issue-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 12px;
+    margin-bottom: 4px;
+}
+
+.issue-text {
+    font-size: 0.92rem;
+    color: var(--text-primary);
+    line-height: 1.5;
+}
+
+.confidence-pill {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 10px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    background: #23242A;
+    color: #F3F4F6;
+}

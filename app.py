@@ -300,7 +300,7 @@ with st.sidebar:
     current_scenario_key = st.session_state.selected_scenario
 
     for scenario_key, title, subtitle in scenario_items:
-        is_active = (st.session_state.chat_sent and current_scenario_key == scenario_key)
+        is_active = (st.session_state.selected_scenario == scenario_key)
         btn_type = "primary" if is_active else "secondary"
         dot_suffix = "  🟢" if is_active else ""
         
@@ -311,9 +311,17 @@ with st.sidebar:
             type=btn_type
         ):
             st.session_state.selected_scenario = scenario_key
-            st.session_state.chat_sent = True
+            st.session_state.chat_sent = False
             st.session_state.selected_highlight_id = None
             st.session_state.lens_active = True
+            
+            scen_data = SCENARIOS[scenario_key]
+            prompt_val = scen_data["prompt"]
+            if scen_data.get("user_data"):
+                prompt_val += "\n\nData:\n" + scen_data["user_data"]
+            
+            st.session_state.composer_text = prompt_val
+            st.session_state["initial_composer_field"] = prompt_val
             st.session_state.last_loaded_scenario = scenario_key
             
             if "selected_hl" in st.query_params:
@@ -348,29 +356,32 @@ if not st.session_state.chat_sent:
     # Scenario Cards Grid (3 cards)
     scen_col1, scen_col2, scen_col3 = st.columns(3)
     
+    def populate_scenario(scen_key):
+        st.session_state.selected_scenario = scen_key
+        st.session_state.chat_sent = False
+        st.session_state.selected_highlight_id = None
+        st.session_state.lens_active = True
+        
+        scen_info = SCENARIOS[scen_key]
+        prompt_str = scen_info["prompt"]
+        if scen_info.get("user_data"):
+            prompt_str += "\n\nData:\n" + scen_info["user_data"]
+            
+        st.session_state.composer_text = prompt_str
+        st.session_state["initial_composer_field"] = prompt_str
+        st.rerun()
+
     with scen_col1:
         if st.button("📊 Data Analysis\n\nCampaign ROI & correlation", key="main_scen_data_analysis", use_container_width=True):
-            st.session_state.selected_scenario = "📊 Data Analysis"
-            st.session_state.chat_sent = True
-            st.session_state.selected_highlight_id = None
-            st.session_state.lens_active = True
-            st.rerun()
+            populate_scenario("📊 Data Analysis")
 
     with scen_col2:
         if st.button("🔎 Market Research\n\nCoffee subscription survey", key="main_scen_market_research", use_container_width=True):
-            st.session_state.selected_scenario = "🔎 Market Research"
-            st.session_state.chat_sent = True
-            st.session_state.selected_highlight_id = None
-            st.session_state.lens_active = True
-            st.rerun()
+            populate_scenario("🔎 Market Research")
 
     with scen_col3:
         if st.button("💻 Code Generation\n\nAverage age calculation", key="main_scen_code_gen", use_container_width=True):
-            st.session_state.selected_scenario = "💻 Code Generation"
-            st.session_state.chat_sent = True
-            st.session_state.selected_highlight_id = None
-            st.session_state.lens_active = True
-            st.rerun()
+            populate_scenario("💻 Code Generation")
 
     # Spacing before type bar at bottom of screen
     st.markdown('<div style="margin-top: 40px;"></div>', unsafe_allow_html=True)
@@ -398,12 +409,17 @@ if not st.session_state.chat_sent:
             st.markdown('<div style="padding-top: 6px; text-align: right;"><span style="font-size: 1.2rem; color: #7E7F8F; cursor: pointer;" title="Voice mode">🎙️</span></div>', unsafe_allow_html=True)
         with col_send:
             if st.button("➔", key="chatgpt_send_btn"):
-                if st.session_state.get("composer_text", "").strip():
-                    st.session_state.chat_sent = True
-                    st.session_state.last_sent_prompt = st.session_state.get("composer_text", "")
-                    st.session_state.composer_text = ""
-                    st.session_state.selected_highlight_id = None
-                    st.rerun()
+                user_txt = st.session_state.get("composer_text", "").strip()
+                if not user_txt:
+                    scen = SCENARIOS[st.session_state.selected_scenario]
+                    user_txt = scen["prompt"]
+                    if scen.get("user_data"):
+                        user_txt += "\n\nData:\n" + scen["user_data"]
+                st.session_state.chat_sent = True
+                st.session_state.last_sent_prompt = user_txt
+                st.session_state.composer_text = ""
+                st.session_state.selected_highlight_id = None
+                st.rerun()
 
     st.markdown('</div>', unsafe_allow_html=True)
 
@@ -412,6 +428,7 @@ if not st.session_state.chat_sent:
         ChatGPT can make mistakes. Reasoning Lens highlights underlying logical consistency.
     </div>
     """, unsafe_allow_html=True)
+
 
 else:
     # --- CONVERSATION / ANALYSIS RESPONSE VIEW ---

@@ -266,9 +266,9 @@ button[key="bottom_plus_btn"]:hover * {
 def reset_to_new_chat():
     st.session_state.chat_sent = False
     st.session_state.composer_text = ""
+    st.session_state["initial_composer_field"] = ""
+    st.session_state["bottom_composer_field"] = ""
     st.session_state.selected_highlight_id = None
-    st.session_state.pop("initial_composer_field", None)
-    st.session_state.pop("bottom_composer_field", None)
     if "selected_hl" in st.query_params:
         try:
             st.query_params.clear()
@@ -365,7 +365,7 @@ with st.sidebar:
                 prompt_val += "\n\nData:\n" + scen_data["user_data"]
             
             st.session_state.composer_text = prompt_val
-            st.session_state.pop("initial_composer_field", None)
+            st.session_state["initial_composer_field"] = prompt_val
             st.session_state.last_loaded_scenario = scenario_key
             
             if "selected_hl" in st.query_params:
@@ -412,7 +412,7 @@ if not st.session_state.chat_sent:
             prompt_str += "\n\nData:\n" + scen_info["user_data"]
             
         st.session_state.composer_text = prompt_str
-        st.session_state.pop("initial_composer_field", None)
+        st.session_state["initial_composer_field"] = prompt_str
         st.rerun()
 
     with scen_col1:
@@ -462,6 +462,7 @@ if not st.session_state.chat_sent:
                 st.session_state.chat_sent = True
                 st.session_state.last_sent_prompt = user_txt
                 st.session_state.composer_text = ""
+                st.session_state["initial_composer_field"] = ""
                 st.session_state.selected_highlight_id = None
                 st.rerun()
 

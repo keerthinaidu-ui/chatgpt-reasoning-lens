@@ -462,7 +462,6 @@ if not st.session_state.chat_sent:
                 st.session_state.chat_sent = True
                 st.session_state.last_sent_prompt = user_txt
                 st.session_state.composer_text = ""
-                st.session_state["initial_composer_field"] = ""
                 st.session_state.selected_highlight_id = None
                 st.rerun()
 
@@ -671,7 +670,7 @@ else:
                 st.session_state.chat_sent = True
                 st.session_state.last_sent_prompt = st.session_state.composer_text
                 st.session_state.composer_text = ""
-                st.session_state.pop("bottom_composer_field", None)
+                st.session_state["bottom_composer_field"] = ""
                 st.rerun()
     st.markdown('</div>', unsafe_allow_html=True)
 

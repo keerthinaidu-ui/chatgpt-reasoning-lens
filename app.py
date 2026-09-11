@@ -266,27 +266,9 @@ button[key="bottom_plus_btn"]:hover * {
 def reset_to_new_chat():
     st.session_state.chat_sent = False
     st.session_state.composer_text = ""
+    st.session_state["initial_composer_field"] = ""
+    st.session_state["bottom_composer_field"] = ""
     st.session_state.selected_highlight_id = None
-    st.session_state.pop("initial_composer_field", None)
-    st.session_state.pop("bottom_composer_field", None)
-    if "selected_hl" in st.query_params:
-        st.query_params.clear()
-    st.rerun()
-
-def populate_scenario(scen_key):
-    st.session_state.selected_scenario = scen_key
-    st.session_state.chat_sent = False
-    st.session_state.selected_highlight_id = None
-    st.session_state.lens_active = True
-    
-    scen_info = SCENARIOS[scen_key]
-    prompt_str = scen_info["prompt"]
-    if scen_info.get("user_data"):
-        prompt_str += "\n\nData:\n" + scen_info["user_data"]
-        
-    st.session_state.composer_text = prompt_str
-    st.session_state.pop("initial_composer_field", None)
-    st.session_state.pop("bottom_composer_field", None)
     if "selected_hl" in st.query_params:
         st.query_params.clear()
     st.rerun()
@@ -349,6 +331,7 @@ with st.sidebar:
     if st.button("➕ New Chat", key="new_chat_btn", use_container_width=True):
         reset_to_new_chat()
 
+
     st.markdown('<div class="sidebar-section-label-forced">TRY SCENARIOS</div>', unsafe_allow_html=True)
 
     scenario_items = [
@@ -370,7 +353,23 @@ with st.sidebar:
             use_container_width=True,
             type=btn_type
         ):
-            populate_scenario(scenario_key)
+            st.session_state.selected_scenario = scenario_key
+            st.session_state.chat_sent = False
+            st.session_state.selected_highlight_id = None
+            st.session_state.lens_active = True
+            
+            scen_data = SCENARIOS[scenario_key]
+            prompt_val = scen_data["prompt"]
+            if scen_data.get("user_data"):
+                prompt_val += "\n\nData:\n" + scen_data["user_data"]
+            
+            st.session_state.composer_text = prompt_val
+            st.session_state["initial_composer_field"] = prompt_val
+            st.session_state.last_loaded_scenario = scenario_key
+            
+            if "selected_hl" in st.query_params:
+                st.query_params.clear()
+            st.rerun()
 
     st.markdown("""
     <div style="background: #15161A; border: 1px solid #23242A; border-radius: 10px; padding: 14px; margin-top: 50px; font-size: 0.78rem; color: #7E7F8F; line-height: 1.5;">
@@ -399,6 +398,21 @@ if not st.session_state.chat_sent:
 
     # Scenario Cards Grid (3 cards)
     scen_col1, scen_col2, scen_col3 = st.columns(3)
+    
+    def populate_scenario(scen_key):
+        st.session_state.selected_scenario = scen_key
+        st.session_state.chat_sent = False
+        st.session_state.selected_highlight_id = None
+        st.session_state.lens_active = True
+        
+        scen_info = SCENARIOS[scen_key]
+        prompt_str = scen_info["prompt"]
+        if scen_info.get("user_data"):
+            prompt_str += "\n\nData:\n" + scen_info["user_data"]
+            
+        st.session_state.composer_text = prompt_str
+        st.session_state["initial_composer_field"] = prompt_str
+        st.rerun()
 
     with scen_col1:
         if st.button("📊 Data Analysis\n\nCampaign ROI & correlation", key="main_scen_data_analysis", use_container_width=True):
@@ -433,7 +447,6 @@ if not st.session_state.chat_sent:
     with bar_c1:
         if st.button("➕", key="bar_plus_btn", help="New Chat"):
             reset_to_new_chat()
-
     with bar_c3:
         col_mic, col_send = st.columns([1, 1])
         with col_mic:
@@ -449,8 +462,6 @@ if not st.session_state.chat_sent:
                 st.session_state.chat_sent = True
                 st.session_state.last_sent_prompt = user_txt
                 st.session_state.composer_text = ""
-                st.session_state.pop("initial_composer_field", None)
-                st.session_state.pop("bottom_composer_field", None)
                 st.session_state.selected_highlight_id = None
                 st.rerun()
 
@@ -651,7 +662,6 @@ else:
     with r_col1:
         if st.button("➕", key="bottom_plus_btn", help="New Chat"):
             reset_to_new_chat()
-
     with r_col3:
         r_col_mic, r_col_send = st.columns([1, 1])
         with r_col_mic:
@@ -661,10 +671,8 @@ else:
                 st.session_state.chat_sent = True
                 st.session_state.last_sent_prompt = st.session_state.composer_text
                 st.session_state.composer_text = ""
-                st.session_state.pop("bottom_composer_field", None)
-                st.session_state.pop("initial_composer_field", None)
+                st.session_state["bottom_composer_field"] = ""
                 st.rerun()
-
     st.markdown('</div>', unsafe_allow_html=True)
 
     st.markdown("""

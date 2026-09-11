@@ -195,27 +195,39 @@ button[key="bottom_send_btn"]:hover {
     contain: content;
 }
 
-.reasoning-lens-explanation-card {
-    /* Clean display toggle */
+/* Main Page Scenario Cards */
+div[data-testid="stColumn"] button[key^="main_scen_"] {
+    background-color: #15161A !important;
+    border: 1px solid #23242A !important;
+    border-radius: 12px !important;
+    padding: 16px 14px !important;
+    color: #ECECF1 !important;
+    min-height: 95px !important;
+    height: 100% !important;
+    text-align: left !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    align-items: flex-start !important;
+    transition: all 0.2s ease !important;
+    white-space: pre-wrap !important;
+}
+
+div[data-testid="stColumn"] button[key^="main_scen_"]:hover {
+    border-color: #00A67E !important;
+    background-color: #1C1D24 !important;
+    box-shadow: 0 4px 14px rgba(0, 166, 126, 0.2) !important;
+}
+
+div[data-testid="stColumn"] button[key^="main_scen_"] * {
+    text-align: left !important;
 }
 </style>
 """, unsafe_allow_html=True)
 
-# 3. Handle Inline Click Queries & State
-valid_hl_ids = {f"{s['id']}_{hl['id']}" for s in SCENARIOS.values() for hl in s.get("highlights", [])}
-if "selected_hl" in st.query_params:
-    hl_param = st.query_params["selected_hl"]
-    if hl_param in valid_hl_ids:
-        st.session_state.selected_highlight_id = hl_param
-        st.session_state.chat_sent = True
-        if hl_param.startswith("market_research_"):
-            st.session_state.selected_scenario = "🔎 Market Research"
-        elif hl_param.startswith("code_gen_"):
-            st.session_state.selected_scenario = "💻 Code Generation"
-        elif hl_param.startswith("data_analysis_"):
-            st.session_state.selected_scenario = "📊 Data Analysis"
-    else:
-        st.session_state.selected_highlight_id = None
+# 3. Initialize Base Session State
+if "chat_sent" not in st.session_state:
+    st.session_state.chat_sent = False
 
 if "selected_scenario" not in st.session_state or st.session_state.selected_scenario not in SCENARIOS:
     st.session_state.selected_scenario = list(SCENARIOS.keys())[0]
@@ -223,27 +235,41 @@ if "selected_scenario" not in st.session_state or st.session_state.selected_scen
 if "last_loaded_scenario" not in st.session_state:
     st.session_state.last_loaded_scenario = st.session_state.selected_scenario
 
-current_data = SCENARIOS[st.session_state.selected_scenario]
-
 if "composer_text" not in st.session_state:
-    full_prompt = current_data["prompt"]
-    if current_data.get("user_data"):
-        full_prompt += "\n\nData:\n" + current_data["user_data"]
-    st.session_state.composer_text = full_prompt
+    st.session_state.composer_text = ""
 
 if "last_sent_prompt" not in st.session_state:
-    st.session_state.last_sent_prompt = st.session_state.composer_text
-
-if "chat_sent" not in st.session_state:
-    st.session_state.chat_sent = False
+    st.session_state.last_sent_prompt = ""
 
 if "lens_active" not in st.session_state:
     st.session_state.lens_active = True
 
 if "selected_highlight_id" not in st.session_state:
-    st.session_state.selected_highlight_id = None # Hidden by default until clicked!
+    st.session_state.selected_highlight_id = None
 
-# 5. DIRECT SIDEBAR RENDERING
+# Handle URL query params ONLY if already viewing a response
+valid_hl_ids = {f"{s['id']}_{hl['id']}" for s in SCENARIOS.values() for hl in s.get("highlights", [])}
+if "selected_hl" in st.query_params:
+    if not st.session_state.chat_sent:
+        try:
+            st.query_params.clear()
+        except Exception:
+            pass
+        st.session_state.selected_highlight_id = None
+    else:
+        hl_param = st.query_params["selected_hl"]
+        if hl_param in valid_hl_ids:
+            st.session_state.selected_highlight_id = hl_param
+            if hl_param.startswith("market_research_"):
+                st.session_state.selected_scenario = "🔎 Market Research"
+            elif hl_param.startswith("code_gen_"):
+                st.session_state.selected_scenario = "💻 Code Generation"
+            elif hl_param.startswith("data_analysis_"):
+                st.session_state.selected_scenario = "📊 Data Analysis"
+        else:
+            st.session_state.selected_highlight_id = None
+
+# 4. DIRECT SIDEBAR RENDERING
 with st.sidebar:
     st.markdown("""
     <div class="sidebar-header-box-forced">
@@ -252,14 +278,18 @@ with st.sidebar:
         </svg>
         <span class="sidebar-brand-title-forced">ChatGPT</span>
     </div>
-    <div style="margin-bottom: 20px;">
-        <button style="width: 100%; background: #15161A; border: 1px solid #23242A; color: #ECECF1; padding: 10px 14px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
-            <span>➕ New Chat</span>
-            <span style="font-size: 0.75rem; color: #7E7F8F; background: #1F2026; padding: 2px 6px; border-radius: 4px;">⌘K</span>
-        </button>
-    </div>
-    <div class="sidebar-section-label-forced">TRY SCENARIOS</div>
     """, unsafe_allow_html=True)
+
+    if st.button("➕ New Chat", key="new_chat_btn", use_container_width=True):
+        st.session_state.chat_sent = False
+        st.session_state.composer_text = ""
+        st.session_state["initial_composer_field"] = ""
+        st.session_state.selected_highlight_id = None
+        if "selected_hl" in st.query_params:
+            st.query_params.clear()
+        st.rerun()
+
+    st.markdown('<div class="sidebar-section-label-forced">TRY SCENARIOS</div>', unsafe_allow_html=True)
 
     scenario_items = [
         ("📊 Data Analysis", "📊 Data Analysis", "Campaign ROI & correlation"),
@@ -270,7 +300,7 @@ with st.sidebar:
     current_scenario_key = st.session_state.selected_scenario
 
     for scenario_key, title, subtitle in scenario_items:
-        is_active = (current_scenario_key == scenario_key)
+        is_active = (st.session_state.chat_sent and current_scenario_key == scenario_key)
         btn_type = "primary" if is_active else "secondary"
         dot_suffix = "  🟢" if is_active else ""
         
@@ -281,17 +311,9 @@ with st.sidebar:
             type=btn_type
         ):
             st.session_state.selected_scenario = scenario_key
-            st.session_state.chat_sent = False
+            st.session_state.chat_sent = True
             st.session_state.selected_highlight_id = None
             st.session_state.lens_active = True
-            
-            # Immediately update composer text for the newly selected scenario!
-            scen_data = SCENARIOS[scenario_key]
-            prompt_val = scen_data["prompt"]
-            if scen_data.get("user_data"):
-                prompt_val += "\n\nData:\n" + scen_data["user_data"]
-            st.session_state.composer_text = prompt_val
-            st.session_state["initial_composer_field"] = prompt_val
             st.session_state.last_loaded_scenario = scenario_key
             
             if "selected_hl" in st.query_params:
@@ -307,45 +329,60 @@ with st.sidebar:
     </div>
     """, unsafe_allow_html=True)
 
-# Handle Scenario Change state sync
-if st.session_state.get("last_loaded_scenario") != st.session_state.selected_scenario:
-    st.session_state.last_loaded_scenario = st.session_state.selected_scenario
-    current_data = SCENARIOS[st.session_state.selected_scenario]
-    
-    full_prompt = current_data["prompt"]
-    if current_data.get("user_data"):
-        full_prompt += "\n\nData:\n" + current_data["user_data"]
-    
-    st.session_state.composer_text = full_prompt
-    st.session_state["initial_composer_field"] = full_prompt
-    st.session_state.last_sent_prompt = full_prompt
-    st.session_state.chat_sent = False
-    st.session_state.selected_highlight_id = None
-    st.session_state.lens_active = True
-
 scenario_data = SCENARIOS[st.session_state.selected_scenario]
 
-# 6. Main Screen Rendering
+# 5. Main Screen Rendering
 if not st.session_state.chat_sent:
     # --- INITIAL SCREEN VIEW (ChatGPT Homescreen) ---
     st.markdown("""
-    <div class="center-hero" style="text-align: center; padding-top: 40px; padding-bottom: 20px;">
+    <div class="center-hero" style="text-align: center; padding-top: 30px; padding-bottom: 20px;">
         <div class="hero-icon-circle" style="width: 56px; height: 56px; background: #15161A; border: 1px solid #23242A; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 14px;">
             <svg width="34" height="34" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M22.2819 9.8211C21.6881 4.5451 17.0706 0.5 11.5 0.5C5.42487 0.5 0.5 5.42487 0.5 11.5C0.5 17.0706 4.5451 21.6881 9.8211 22.2819C10.3756 22.3442 10.875 21.9056 10.875 21.3482V18.1583C10.875 17.6534 10.5056 17.2248 10.0076 17.1479C6.88339 16.6648 4.5 13.963 4.5 10.75C4.5 7.02208 7.52208 4 11.25 4C14.9779 4 18 7.02208 18 10.75C18 13.963 15.6166 16.6648 12.4924 17.1479C11.9944 17.2248 11.625 17.6534 11.625 18.1583V21.3482C11.625 21.9056 12.1244 22.3442 12.6789 22.2819C17.9549 21.6881 22 17.0706 22 11.5C22 10.932 21.9576 10.372 21.876 9.8229L22.2819 9.8211Z" fill="#00A67E"/>
             </svg>
         </div>
-        <div class="hero-main-title" style="font-size: 2.1rem; font-weight: 700; margin-top: 14px; margin-bottom: 24px; color: #FFFFFF;">What's on your mind?</div>
+        <div class="hero-main-title" style="font-size: 1.8rem; font-weight: 700; margin-top: 10px; margin-bottom: 24px; color: #FFFFFF;">What's on your mind? Pick any scenario</div>
     </div>
     """, unsafe_allow_html=True)
+
+    # Scenario Cards Grid (3 cards)
+    scen_col1, scen_col2, scen_col3 = st.columns(3)
+    
+    with scen_col1:
+        if st.button("📊 Data Analysis\n\nCampaign ROI & correlation", key="main_scen_data_analysis", use_container_width=True):
+            st.session_state.selected_scenario = "📊 Data Analysis"
+            st.session_state.chat_sent = True
+            st.session_state.selected_highlight_id = None
+            st.session_state.lens_active = True
+            st.rerun()
+
+    with scen_col2:
+        if st.button("🔎 Market Research\n\nCoffee subscription survey", key="main_scen_market_research", use_container_width=True):
+            st.session_state.selected_scenario = "🔎 Market Research"
+            st.session_state.chat_sent = True
+            st.session_state.selected_highlight_id = None
+            st.session_state.lens_active = True
+            st.rerun()
+
+    with scen_col3:
+        if st.button("💻 Code Generation\n\nAverage age calculation", key="main_scen_code_gen", use_container_width=True):
+            st.session_state.selected_scenario = "💻 Code Generation"
+            st.session_state.chat_sent = True
+            st.session_state.selected_highlight_id = None
+            st.session_state.lens_active = True
+            st.rerun()
+
+    # Spacing before type bar at bottom of screen
+    st.markdown('<div style="margin-top: 40px;"></div>', unsafe_allow_html=True)
 
     # ChatGPT Typing Bar Container
     st.markdown('<div class="composer-card-container">', unsafe_allow_html=True)
     
     composer_text = st.text_area(
         "Composer",
-        value=st.session_state.composer_text,
-        height=150,
+        value=st.session_state.get("composer_text", ""),
+        placeholder="Ask anything or pick a scenario above...",
+        height=100,
         key="initial_composer_field",
         label_visibility="collapsed"
     )
@@ -361,11 +398,12 @@ if not st.session_state.chat_sent:
             st.markdown('<div style="padding-top: 6px; text-align: right;"><span style="font-size: 1.2rem; color: #7E7F8F; cursor: pointer;" title="Voice mode">🎙️</span></div>', unsafe_allow_html=True)
         with col_send:
             if st.button("➔", key="chatgpt_send_btn"):
-                st.session_state.chat_sent = True
-                st.session_state.last_sent_prompt = st.session_state.get("composer_text", "")
-                st.session_state.composer_text = ""
-                st.session_state.selected_highlight_id = None
-                st.rerun()
+                if st.session_state.get("composer_text", "").strip():
+                    st.session_state.chat_sent = True
+                    st.session_state.last_sent_prompt = st.session_state.get("composer_text", "")
+                    st.session_state.composer_text = ""
+                    st.session_state.selected_highlight_id = None
+                    st.rerun()
 
     st.markdown('</div>', unsafe_allow_html=True)
 
@@ -377,7 +415,6 @@ if not st.session_state.chat_sent:
 
 else:
     # --- CONVERSATION / ANALYSIS RESPONSE VIEW ---
-    # Reasoning Lens toggle appears ONLY AFTER output generation
     top_col1, top_col2 = st.columns([4, 2])
     with top_col2:
         st.markdown('<div class="top-toggle-container">', unsafe_allow_html=True)

@@ -222,8 +222,56 @@ div[data-testid="stColumn"] button[key^="main_scen_"]:hover {
 div[data-testid="stColumn"] button[key^="main_scen_"] * {
     text-align: left !important;
 }
+
+/* Plus Icon Buttons inside Composer Bar */
+button[key="bar_plus_btn"],
+button[key="bottom_plus_btn"],
+div[data-testid="stColumn"] button[key="bar_plus_btn"],
+div[data-testid="stColumn"] button[key="bottom_plus_btn"] {
+    background: transparent !important;
+    border: none !important;
+    color: #7E7F8F !important;
+    font-size: 1.2rem !important;
+    font-weight: bold !important;
+    padding: 0 !important;
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    box-shadow: none !important;
+    cursor: pointer !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+button[key="bar_plus_btn"] *,
+button[key="bottom_plus_btn"] * {
+    color: #7E7F8F !important;
+    font-size: 1.2rem !important;
+}
+
+button[key="bar_plus_btn"]:hover,
+button[key="bottom_plus_btn"]:hover {
+    background: #1F2026 !important;
+    border-radius: 50% !important;
+}
+
+button[key="bar_plus_btn"]:hover *,
+button[key="bottom_plus_btn"]:hover * {
+    color: #ECECF1 !important;
+}
 </style>
 """, unsafe_allow_html=True)
+
+def reset_to_new_chat():
+    st.session_state.chat_sent = False
+    st.session_state.composer_text = ""
+    st.session_state["initial_composer_field"] = ""
+    st.session_state["bottom_composer_field"] = ""
+    st.session_state.selected_highlight_id = None
+    if "selected_hl" in st.query_params:
+        st.query_params.clear()
+    st.rerun()
 
 # 3. Initialize Base Session State
 if "chat_sent" not in st.session_state:
@@ -281,13 +329,7 @@ with st.sidebar:
     """, unsafe_allow_html=True)
 
     if st.button("➕ New Chat", key="new_chat_btn", use_container_width=True):
-        st.session_state.chat_sent = False
-        st.session_state.composer_text = ""
-        st.session_state["initial_composer_field"] = ""
-        st.session_state.selected_highlight_id = None
-        if "selected_hl" in st.query_params:
-            st.query_params.clear()
-        st.rerun()
+        reset_to_new_chat()
 
     st.markdown('<div class="sidebar-section-label-forced">TRY SCENARIOS</div>', unsafe_allow_html=True)
 
@@ -402,7 +444,9 @@ if not st.session_state.chat_sent:
     # Bottom Toolbar inside typing bar
     bar_c1, bar_c2, bar_c3 = st.columns([1, 8, 2.2])
     with bar_c1:
-        st.markdown('<div style="padding-top: 6px;"><span style="font-size: 1.3rem; color: #7E7F8F; margin-left: 4px; cursor: pointer;" title="Add attachment">➕</span></div>', unsafe_allow_html=True)
+        if st.button("➕", key="bar_plus_btn", help="New Chat"):
+            reset_to_new_chat()
+
     with bar_c3:
         col_mic, col_send = st.columns([1, 1])
         with col_mic:
@@ -616,7 +660,9 @@ else:
 
     r_col1, r_col2, r_col3 = st.columns([1, 8, 2.2])
     with r_col1:
-        st.markdown('<div style="padding-top: 6px;"><span style="font-size: 1.3rem; color: #7E7F8F; margin-left: 4px; cursor: pointer;">➕</span></div>', unsafe_allow_html=True)
+        if st.button("➕", key="bottom_plus_btn", help="New Chat"):
+            reset_to_new_chat()
+
     with r_col3:
         r_col_mic, r_col_send = st.columns([1, 1])
         with r_col_mic:

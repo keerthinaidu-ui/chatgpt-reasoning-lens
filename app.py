@@ -266,12 +266,14 @@ button[key="bottom_plus_btn"]:hover * {
 def reset_to_new_chat():
     st.session_state.chat_sent = False
     st.session_state.composer_text = ""
-    st.session_state["initial_composer_field"] = ""
-    st.session_state["bottom_composer_field"] = ""
     st.session_state.selected_highlight_id = None
+    st.session_state.pop("initial_composer_field", None)
+    st.session_state.pop("bottom_composer_field", None)
     if "selected_hl" in st.query_params:
-        st.query_params.clear()
-    st.rerun()
+        try:
+            st.query_params.clear()
+        except Exception:
+            pass
 
 # 3. Initialize Base Session State
 if "chat_sent" not in st.session_state:
@@ -328,8 +330,7 @@ with st.sidebar:
     </div>
     """, unsafe_allow_html=True)
 
-    if st.button("➕ New Chat", key="new_chat_btn", use_container_width=True):
-        reset_to_new_chat()
+    st.button("➕ New Chat", key="new_chat_btn", use_container_width=True, on_click=reset_to_new_chat)
 
 
     st.markdown('<div class="sidebar-section-label-forced">TRY SCENARIOS</div>', unsafe_allow_html=True)
@@ -364,7 +365,7 @@ with st.sidebar:
                 prompt_val += "\n\nData:\n" + scen_data["user_data"]
             
             st.session_state.composer_text = prompt_val
-            st.session_state["initial_composer_field"] = prompt_val
+            st.session_state.pop("initial_composer_field", None)
             st.session_state.last_loaded_scenario = scenario_key
             
             if "selected_hl" in st.query_params:
@@ -411,7 +412,7 @@ if not st.session_state.chat_sent:
             prompt_str += "\n\nData:\n" + scen_info["user_data"]
             
         st.session_state.composer_text = prompt_str
-        st.session_state["initial_composer_field"] = prompt_str
+        st.session_state.pop("initial_composer_field", None)
         st.rerun()
 
     with scen_col1:
@@ -445,8 +446,7 @@ if not st.session_state.chat_sent:
     # Bottom Toolbar inside typing bar
     bar_c1, bar_c2, bar_c3 = st.columns([1, 8, 2.2])
     with bar_c1:
-        if st.button("➕", key="bar_plus_btn", help="New Chat"):
-            reset_to_new_chat()
+        st.button("➕", key="bar_plus_btn", help="New Chat", on_click=reset_to_new_chat)
     with bar_c3:
         col_mic, col_send = st.columns([1, 1])
         with col_mic:
@@ -660,8 +660,7 @@ else:
 
     r_col1, r_col2, r_col3 = st.columns([1, 8, 2.2])
     with r_col1:
-        if st.button("➕", key="bottom_plus_btn", help="New Chat"):
-            reset_to_new_chat()
+        st.button("➕", key="bottom_plus_btn", help="New Chat", on_click=reset_to_new_chat)
     with r_col3:
         r_col_mic, r_col_send = st.columns([1, 1])
         with r_col_mic:
@@ -671,7 +670,7 @@ else:
                 st.session_state.chat_sent = True
                 st.session_state.last_sent_prompt = st.session_state.composer_text
                 st.session_state.composer_text = ""
-                st.session_state["bottom_composer_field"] = ""
+                st.session_state.pop("bottom_composer_field", None)
                 st.rerun()
     st.markdown('</div>', unsafe_allow_html=True)
 

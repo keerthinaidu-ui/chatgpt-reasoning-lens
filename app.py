@@ -292,7 +292,7 @@ if "last_sent_prompt" not in st.session_state:
     st.session_state.last_sent_prompt = ""
 
 if "lens_active" not in st.session_state:
-    st.session_state.lens_active = True
+    st.session_state.lens_active = False
 
 if "selected_highlight_id" not in st.session_state:
     st.session_state.selected_highlight_id = None
@@ -357,7 +357,7 @@ with st.sidebar:
             st.session_state.selected_scenario = scenario_key
             st.session_state.chat_sent = False
             st.session_state.selected_highlight_id = None
-            st.session_state.lens_active = True
+            st.session_state.lens_active = False
             
             scen_data = SCENARIOS[scenario_key]
             prompt_val = scen_data["prompt"]
@@ -404,7 +404,7 @@ if not st.session_state.chat_sent:
         st.session_state.selected_scenario = scen_key
         st.session_state.chat_sent = False
         st.session_state.selected_highlight_id = None
-        st.session_state.lens_active = True
+        st.session_state.lens_active = False
         
         scen_info = SCENARIOS[scen_key]
         prompt_str = scen_info["prompt"]
@@ -480,8 +480,8 @@ else:
     with top_col2:
         st.markdown('<div class="top-toggle-container">', unsafe_allow_html=True)
         lens_on = st.toggle(
-            "● Reasoning Lens ON" if st.session_state.get("lens_active", True) else "Reasoning Lens OFF",
-            value=st.session_state.get("lens_active", True),
+            "● Reasoning Lens ON" if st.session_state.get("lens_active", False) else "Reasoning Lens OFF",
+            value=st.session_state.get("lens_active", False),
             key="top_lens_toggle"
         )
         st.session_state.lens_active = lens_on

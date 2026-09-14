@@ -552,10 +552,38 @@ else:
 
             hl_issue_type = html.escape(str(hl["issue_type"]))
             hl_confidence = html.escape(str(hl["confidence"]))
-            hl_issue = html.escape(str(hl["issue"]))
-            hl_why_it_matters = html.escape(str(hl["why_it_matters"]))
-            hl_what_to_check = html.escape(str(hl["what_to_check"]))
+            hl_why_flagged = html.escape(str(hl["why_flagged"]))
+            hl_what_assumes = html.escape(str(hl["what_assumes"]))
+            hl_evidence_supports = html.escape(str(hl["evidence_supports"]))
+            hl_evidence_missing = html.escape(str(hl["evidence_missing"]))
+            hl_why_uncertain = html.escape(str(hl["why_uncertain"]))
             hl_what_could_change = html.escape(str(hl["what_could_change"]))
+
+            sources = hl.get("sources", [])
+            if sources:
+                source_items_html = ""
+                for s in sources:
+                    s_title = html.escape(str(s["title"]))
+                    s_url = html.escape(str(s["url"]), quote=True)
+                    s_domain = html.escape(str(s["domain"]))
+                    source_items_html += (
+                        f'<li style="margin-bottom: 4px;">'
+                        f'<a href="{s_url}" target="_blank" rel="noopener noreferrer" style="color: #60A5FA; text-decoration: underline; font-weight: 500;">{s_title}</a> '
+                        f'<span style="color: #9CA3AF; font-size: 0.78rem;">({s_domain})</span>'
+                        f'</li>'
+                    )
+                sources_section_html = (
+                    f'<div style="font-size: 0.83rem; margin-top: 10px; padding-top: 10px; border-top: 1px solid #2D2E3A; line-height: 1.5;">'
+                    f'<b style="color: #10B981; display: block; margin-bottom: 4px;">🔗 Verified Sources & Citations:</b>'
+                    f'<ul style="margin: 0 0 0 18px; padding: 0; color: #D1D5DB;">{source_items_html}</ul>'
+                    f'</div>'
+                )
+            else:
+                sources_section_html = (
+                    f'<div style="font-size: 0.83rem; color: #7E7F8F; margin-top: 10px; padding-top: 10px; border-top: 1px solid #2D2E3A; line-height: 1.5;">'
+                    f'<b style="color: #7E7F8F;">🔗 Sources & Evidence:</b> No external primary source required; evaluated directly against internal prompt data / code logic.'
+                    f'</div>'
+                )
 
             card_html = (
                 f'<div id="card-{unique_id}" class="reasoning-lens-explanation-card" '
@@ -565,10 +593,13 @@ else:
                 f'<span style="background-color: {badge_color}; color: #111827; font-size: 0.75rem; font-weight: 700; padding: 4px 12px; border-radius: 12px; text-transform: uppercase; letter-spacing: 0.5px;">{hl_issue_type}</span>'
                 f'<span style="font-size: 0.8rem; color: #7E7F8F;">Confidence: <b style="color: #ECECF1;">{hl_confidence}</b></span>'
                 f'</div>'
-                f'<div style="font-weight: 600; font-size: 0.95rem; color: #FFFFFF; margin-bottom: 8px;">{hl_issue}</div>'
-                f'<div style="font-size: 0.85rem; color: #D1D5DB; margin-bottom: 6px; line-height: 1.5;"><b style="color: #7E7F8F;">Why it matters:</b> {hl_why_it_matters}</div>'
-                f'<div style="font-size: 0.85rem; color: #D1D5DB; margin-bottom: 6px; line-height: 1.5;"><b style="color: #7E7F8F;">What to check:</b> {hl_what_to_check}</div>'
-                f'<div style="font-size: 0.85rem; color: #D1D5DB; line-height: 1.5;"><b style="color: #7E7F8F;">What could change:</b> {hl_what_could_change}</div>'
+                f'<div style="font-weight: 600; font-size: 0.95rem; color: #FFFFFF; margin-bottom: 10px;"><b style="color: #F59E0B;">Why is this flagged?</b><br>{hl_why_flagged}</div>'
+                f'<div style="font-size: 0.85rem; color: #D1D5DB; margin-bottom: 6px; line-height: 1.5;"><b style="color: #7E7F8F;">What the claim assumes:</b> {hl_what_assumes}</div>'
+                f'<div style="font-size: 0.85rem; color: #D1D5DB; margin-bottom: 6px; line-height: 1.5;"><b style="color: #7E7F8F;">What evidence supports it:</b> {hl_evidence_supports}</div>'
+                f'<div style="font-size: 0.85rem; color: #D1D5DB; margin-bottom: 6px; line-height: 1.5;"><b style="color: #7E7F8F;">What evidence is missing:</b> {hl_evidence_missing}</div>'
+                f'<div style="font-size: 0.85rem; color: #D1D5DB; margin-bottom: 6px; line-height: 1.5;"><b style="color: #7E7F8F;">Why ChatGPT is uncertain:</b> {hl_why_uncertain}</div>'
+                f'<div style="font-size: 0.85rem; color: #D1D5DB; margin-bottom: 6px; line-height: 1.5;"><b style="color: #7E7F8F;">What would change the conclusion:</b> {hl_what_could_change}</div>'
+                f'{sources_section_html}'
                 f'</div>'
             )
             cards_html += card_html
